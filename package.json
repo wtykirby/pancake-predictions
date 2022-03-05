@@ -19,6 +19,7 @@
   },
   "homepage": "https://github.com/wtykirby/pancake-predictions#readme",
   "dependencies": {
+    "lodash": "^4.17.21",
     "web3": "^1.7.1"
   }
 }

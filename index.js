@@ -1,8 +1,14 @@
 import Web3 from "web3";
 import fs from 'fs';
+import _ from 'lodash';
 
-// Determine how many previous rounds to fetch
-const ROUNDS_TO_FETCH = 1000;
+// How many previous rounds to fetch
+const ROUNDS_TO_FETCH = 100;
+// How many rounds to fetch in a single chunk
+const CHUNK_SIZE = 50;
+// How long to wait between chunks
+const SLEEP_TIME = 1000;
+// The file to write the results to 
 const OUTPUT_FILE = './results.json';
 
 // Connect to one of BSC's public RPC nodes
@@ -51,17 +57,21 @@ async function getHistoricalRounds(count) {
     const start = currentEpoch - 1 - count;
 
     // Build the list of requests for fetching all of the rounds. This helps to speed up the data fetching
-    const promises = [];
+    const requests = [];
     for (let epoch = start; epoch < currentEpoch - 1; epoch++) {
-        const promise = instance.methods.rounds(epoch).call()
-            .catch((error) => {
-                // Ignore failures
-            });
-        promises.push(promise);
+        requests.push(instance.methods.rounds(epoch));
     }
 
-    // Fetch all of the rounds
-    const rounds = await Promise.all(promises);
+    // Fetch all of the rounds in chunks
+    let rounds = [];
+    for (const chunk of _.chunk(requests, CHUNK_SIZE)) {
+        const promises = chunk.map(el => {
+            return el.call().catch(() => {});
+        });
+        const fetched = await Promise.all(promises);
+        rounds = [...rounds, ...fetched];
+        await sleep(SLEEP_TIME);
+    }
 
     // Return a formatted copy of the data
     return rounds.map(round => getFormattedRound(round));
@@ -86,4 +96,10 @@ function getFormattedRound(round) {
         bearAmount: round.bearAmount,
         result
     }
+}
+
+function sleep(ms) {
+    return new Promise((resolve) => {
+        setTimeout(resolve, ms);
+    });
 }
