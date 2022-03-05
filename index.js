@@ -83,6 +83,7 @@ function getFormattedRound(round) {
         closePrice: round.closePrice,
         totalAmount: round.totalAmount,
         bullAmount: round.bullAmount,
+        bearAmount: round.bearAmount,
         result
     }
 }
