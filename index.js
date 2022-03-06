@@ -3,11 +3,11 @@ import fs from 'fs';
 import _ from 'lodash';
 
 // How many previous rounds to fetch
-const ROUNDS_TO_FETCH = 100;
+const ROUNDS_TO_FETCH = 10000;
 // How many rounds to fetch in a single chunk
-const CHUNK_SIZE = 50;
+const CHUNK_SIZE = 500;
 // How long to wait between chunks
-const SLEEP_TIME = 1000;
+const SLEEP_TIME = 500;
 // The file to write the results to 
 const OUTPUT_FILE = './results.json';
 
@@ -82,19 +82,8 @@ function getFormattedRound(round) {
         return;
     }
 
-    const result = round.lockPrice < round.closePrice ? 0 : 1; // "0" is UP and "1" is DOWN
-
     return {
-        epoch: round.epoch,
-        startTimestamp: round.startTimestamp,
-        lockTimestamp: round.lockTimestamp,
-        closeTimestamp: round.closeTimestamp,
-        lockPrice: round.lockPrice,
-        closePrice: round.closePrice,
-        totalAmount: round.totalAmount,
-        bullAmount: round.bullAmount,
-        bearAmount: round.bearAmount,
-        result
+        ...round
     }
 }
 
